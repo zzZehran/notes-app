@@ -1,0 +1,42 @@
+<% layout("/layouts/boilerplate") %>
+<link rel="stylesheet" href="css/textarea.css" />
+<div class="container-fluid" style="height: 100vh">
+  <h1 class="display-5 fw-bold">Notes App</h1>
+  <div class="row mt-4">
+    <div class="col-3" style="border-right: 1px solid grey; min-height: 85vh">
+      <nav class="nav flex-column ms-3">
+        <% for(notes of allNotes) {%>
+        <div class="mt-4">
+          <h2 class="fs-5 mb-0"><%= notes.title %></h2>
+          <small><%= notes.body.slice(0,50) + "..." %></small>
+        </div>
+        <% } %>
+      </nav>
+    </div>
+    <div class="col px-5">
+      <form action="">
+        <div class="d-flex justify-content-between">
+          <input
+            name=""
+            class="display-5 fs-2 fw-bold mb-3"
+            id="title"
+            type="text"
+            placeholder="Title"
+          />
+          <button
+            class="btn btn-warning text-light fw-bold rounded-pill h-50"
+            type="submit"
+          >
+            Save
+          </button>
+        </div>
+        <textarea
+          name=""
+          class="fs-5"
+          id="writingArea"
+          placeholder="Start typing..."
+        ></textarea>
+      </form>
+    </div>
+  </div>
+</div>
