@@ -1,5 +1,6 @@
 <% layout("/layouts/boilerplate") %>
 <link rel="stylesheet" href="css/textarea.css" />
+
 <div class="container-fluid" style="height: 100vh">
   <h1 class="display-5 fw-bold">Notes App</h1>
   <div class="row mt-4">
@@ -8,16 +9,17 @@
         <% for(notes of allNotes) {%>
         <div class="mt-4">
           <h2 class="fs-5 mb-0"><%= notes.title %></h2>
-          <small><%= notes.body.slice(0,50) + "..." %></small>
+          <small><%= notes.body.slice(0,50) + "..." %></small> <br />
+          <button onclick="searchNote( '<%= notes.id %>' )">Open Note</button>
         </div>
         <% } %>
       </nav>
     </div>
     <div class="col px-5">
-      <form action="">
+      <form action="/new" method="POST">
         <div class="d-flex justify-content-between">
           <input
-            name=""
+            name="title"
             class="display-5 fs-2 fw-bold mb-3"
             id="title"
             type="text"
@@ -31,7 +33,7 @@
           </button>
         </div>
         <textarea
-          name=""
+          name="body"
           class="fs-5"
           id="writingArea"
           placeholder="Start typing..."
@@ -40,3 +42,22 @@
     </div>
   </div>
 </div>
+
+<script>
+  const title = document.querySelector("#title");
+  const body = document.querySelector("#writingArea");
+
+  async function searchNote(id) {
+    try {
+      const response = await fetch(`/api/notes/${id}`);
+      const result = await response.json();
+      console.log(result);
+      title.value = result.title;
+      body.value = result.body;
+      return result;
+    } catch (error) {
+      console.log(error.message);
+      return error;
+    }
+  }
+</script>

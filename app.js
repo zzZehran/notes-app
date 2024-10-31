@@ -29,7 +29,13 @@ app.post("/new", async (req, res) => {
   const { title, body } = req.body;
   const newNote = new Note({ title, body });
   await newNote.save();
-  console.log(newNote);
+  res.redirect("/");
+});
+
+app.get("/api/notes/:id", async (req, res) => {
+  const { id } = req.params;
+  const note = await Note.findById(id);
+  res.send(note);
 });
 
 app.listen(3000, () => {
