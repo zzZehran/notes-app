@@ -4,19 +4,29 @@
 <div class="container-fluid" style="height: 100vh">
   <h1 class="display-5 fw-bold">Notes App</h1>
   <div class="row mt-4">
-    <div class="col-3" style="border-right: 1px solid grey; min-height: 85vh">
-      <nav class="nav flex-column ms-3">
+    <div
+      class="col-3 px-0"
+      style="border-right: 1px solid grey; min-height: 85vh"
+    >
+      <nav class="nav flex-column">
         <% for(notes of allNotes) {%>
-        <div class="mt-4">
+        <div class="mt-2 position-relative ps-3">
           <h2 class="fs-5 mb-0"><%= notes.title %></h2>
           <small><%= notes.body.slice(0,50) + "..." %></small> <br />
-          <button onclick="searchNote( '<%= notes.id %>' )">Open Note</button>
+          <!-- <button class="bg-body-secondary">Open Note</button> -->
+          <a
+            class="stretched-link"
+            onclick="searchNote( '<%= notes.id %>' )"
+            style="cursor: pointer"
+          ></a>
         </div>
         <% } %>
       </nav>
     </div>
     <div class="col px-5">
-      <form action="/new" method="POST">
+      <!-- <form action="/new" method="POST"> -->
+      <form id="noteForm">
+        <input type="hidden" id="noteId" name="noteId" value="" />
         <div class="d-flex justify-content-between">
           <input
             name="title"
@@ -25,12 +35,14 @@
             type="text"
             placeholder="Title"
           />
-          <button
-            class="btn btn-warning text-light fw-bold rounded-pill h-50"
-            type="submit"
-          >
-            Save
-          </button>
+          <div>
+            <button class="btn btn-warning text-light fw-bold" type="submit">
+              Save
+            </button>
+            <button type="button" class="btn btn-danger" id="deleteBtn">
+              Delete
+            </button>
+          </div>
         </div>
         <textarea
           name="body"
@@ -46,18 +58,66 @@
 <script>
   const title = document.querySelector("#title");
   const body = document.querySelector("#writingArea");
+  const noteIdInput = document.querySelector("#noteId");
+
+  const deleteBtn = document.querySelector("#deleteBtn");
+  deleteBtn.style.display = "none";
 
   async function searchNote(id) {
     try {
-      const response = await fetch(`/api/notes/${id}`);
+      const response = await fetch(`/notes/${id}`);
       const result = await response.json();
-      console.log(result);
       title.value = result.title;
       body.value = result.body;
+      noteIdInput.value = result._id;
+      deleteBtn.style.display = "inline-block";
       return result;
     } catch (error) {
       console.log(error.message);
-      return error;
     }
   }
+
+  document.querySelector("#noteForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const noteId = noteIdInput.value;
+    const method = noteId ? "PATCH" : "POST";
+    const url = noteId ? `/new/${noteId}` : "/new";
+
+    // Encode data as application/x-www-form-urlencoded
+    const formData = new URLSearchParams();
+    formData.append("title", title.value);
+    formData.append("body", body.value);
+
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData.toString(),
+    });
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      console.error("Failed to save");
+    }
+  });
+
+  deleteBtn.addEventListener("click", async function (e) {
+    e.preventDefault();
+    const id = noteIdInput.value;
+    try {
+      const response = await fetch(`/delete/${id}`, { method: "DELETE" });
+
+      // Check if response is OK and parse as JSON
+      if (response.ok) {
+        const data = await response.json(); // or use .text() if you're returning plain text
+        alert(`Deleted Note: ${data.title}`);
+        window.location.reload();
+      } else {
+        console.error("Failed to delete note:", response.status);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  });
 </script>

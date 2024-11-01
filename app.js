@@ -22,7 +22,8 @@ mongoose
 
 app.get("/", async (req, res) => {
   const allNotes = await Note.find({});
-  res.render("homePage", { allNotes });
+  const note = null;
+  res.render("homePage", { allNotes, note });
 });
 
 app.post("/new", async (req, res) => {
@@ -32,9 +33,38 @@ app.post("/new", async (req, res) => {
   res.redirect("/");
 });
 
-app.get("/api/notes/:id", async (req, res) => {
+app.patch("/new/:id", async (req, res) => {
+  const { id } = req.params; // Get note ID from URL
+  const { title, body } = req.body; // Get updated title and body from request body
+
+  try {
+    // Find the note by ID and update it with the new title and body
+    const updatedNote = await Note.findByIdAndUpdate(
+      id,
+      { title, body },
+      { new: true } // Option to return the updated document
+    );
+
+    if (!updatedNote) {
+      return res.status(404).send("Note not found");
+    }
+
+    res.send(updatedNote); // Send the updated note back as a response
+  } catch (error) {
+    console.error("Error updating note:", error);
+    res.status(500).send("Failed to update note");
+  }
+});
+
+app.get("/notes/:id", async (req, res) => {
   const { id } = req.params;
   const note = await Note.findById(id);
+  res.send(note);
+});
+
+app.delete("/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  const note = await Note.findByIdAndDelete(id);
   res.send(note);
 });
 
