@@ -5,15 +5,25 @@ const mongoose = require("mongoose");
 const ejs = require("ejs");
 const ejsMate = require("ejs-mate");
 const path = require("path");
+const session = require("express-session");
+const flash = require("connect-flash");
 
 const Note = require("./models/notesModel");
 
 app.set("view engine", "ejs");
 app.engine("ejs", ejsMate);
 
+const sessionOptions = {
+  secret: "thisisnotagoodsecret",
+  resave: false,
+  saveUninitialized: false,
+};
+
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.use(session(sessionOptions));
+app.use(flash());
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/notes")
@@ -66,6 +76,8 @@ app.delete("/delete/:id", async (req, res) => {
   const { id } = req.params;
   const note = await Note.findByIdAndDelete(id);
   res.send(note);
+  // req.flash("error", "Note deleted");
+  // res.redirect("/");
 });
 
 app.listen(3000, () => {

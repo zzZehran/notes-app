@@ -112,7 +112,6 @@
       if (response.ok) {
         const data = await response.json(); // or use .text() if you're returning plain text
         alert(`Deleted Note: ${data.title}`);
-        window.location.reload();
       } else {
         console.error("Failed to delete note:", response.status);
       }
